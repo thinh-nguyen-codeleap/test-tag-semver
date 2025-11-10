@@ -1,0 +1,49 @@
+name: "Tag Semver"
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+      - staging
+      - production
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  tag-semver:
+    name: "Tag Semver"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Install GitVersion
+        uses: gittools/actions/gitversion/setup@v4.2.0
+        with:
+          versionSpec: '6.4.x'
+      - name: Show GitVersion
+        id: show-gitversion
+        uses: gittools/actions/gitversion/execute@v4.2.0
+        with:
+          configFilePath: 'gitversion.yml'
+      - name: Tag SemVer and define version
+        shell: bash
+        id: version
+        run: |
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "GitHub Actions Bot"
+          if [ "${{ github.ref }}" == "refs/heads/production" ]; then
+            echo "version=${{ steps.show-gitversion.outputs.majorMinorPatch }}" >> $GITHUB_OUTPUT
+            git tag -f ${{ steps.show-gitversion.outputs.majorMinorPatch }}
+            git push origin ${{ steps.show-gitversion.outputs.majorMinorPatch }} --force
+          else
+            echo "version=${{ steps.show-gitversion.outputs.majorMinorPatch }}${{ steps.show-gitversion.outputs.preReleaseLabelWithDash }}" >> $GITHUB_OUTPUT
+            git tag -f ${{ steps.show-gitversion.outputs.majorMinorPatch }}${{ steps.show-gitversion.outputs.preReleaseLabelWithDash }}
+            git push origin ${{ steps.show-gitversion.outputs.majorMinorPatch }}${{ steps.show-gitversion.outputs.preReleaseLabelWithDash }} --force
+          fi
