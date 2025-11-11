@@ -1,0 +1,35 @@
+name: "Determine Attempt Number"
+
+on:
+  workflow_call:
+
+jobs:
+  determine-attempt:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: List all files
+        run: ls -la
+      # - name: Check if attempt 2 exists
+      #   id: check-attempt
+      #   continue-on-error: true
+      #   run: |
+      #     gh run list
+      #   env:
+      #     GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      # - name: Set retry flag and output result
+      #   id: check-result
+      #   run: |
+      #     if [ "${{ steps.check-attempt.outcome }}" == "success" ]; then
+      #       echo "retry=false" >> $GITHUB_OUTPUT
+      #       echo "✅ Attempt 2 exists - retry=false"
+      #     else
+      #       echo "retry=true" >> $GITHUB_OUTPUT
+      #       echo "⚠️ Attempt 2 does not exist - retry=true"
+      #     fi
+          
+      #     echo "Final output: retry=${{ steps.check-result.outputs.retry || 'not set yet' }}"
